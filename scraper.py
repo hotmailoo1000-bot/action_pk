@@ -11,6 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 # Folder configuration for GitHub Environment
+from google_drive_util import GoogleDriveUtil
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(SCRIPT_DIR, "config.json")
 DATA_PATH = os.path.join(SCRIPT_DIR, "pkcargo_data.json")
@@ -494,8 +495,14 @@ def main():
     # 1. บันทึกลงไฟล์บน GitHub
     save_to_json(all_orders)
     
-    # 2. ส่งข้อมูลไปที่ Google Drive (ผ่าน Apps Script)
-    sync_to_google_drive(all_orders)
+    # 3. อัปโหลดไฟล์ไฟล์ JSON เข้าไปที่ Google Drive โดยตรง
+    try:
+        gdrive = GoogleDriveUtil()
+        # อัปโหลด pkcargo_data.json เข้าไปในโฟลเดอร์ pkcargo_web
+        gdrive.upload_file(DATA_PATH, "pkcargo_web")
+        log("[OK] pkcargo_data.json uploaded to Google Drive!")
+    except Exception as e:
+        log(f"[ERR] Failed to upload to GDrive directly: {e}")
 
     log(" DONE!")
 
