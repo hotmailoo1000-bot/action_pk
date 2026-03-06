@@ -38,6 +38,7 @@ jobs:
           PK_PASSWORD: ${{ secrets.PK_PASSWORD }}
           GOOGLE_SCRIPT_URL: ${{ secrets.GOOGLE_SCRIPT_URL }}
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
           PK_START_PAGE: 1
           PK_MAX_PAGES: 1
         run: python scraper.py

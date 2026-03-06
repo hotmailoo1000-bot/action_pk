@@ -127,13 +127,13 @@ def upload_and_convert_to_gsheet(filepath, filename, folder_path=None):
     return file.get('id')
 
 def upload_file(filepath, filename, folder_name=None):
-    """อัปโหลดไฟล์ (เช่น JSON) ไปยัง Google Drive โดยค้นหาไฟล์เดิมเพื่ออัปเดต ถ้าไม่เจอจะสร้างใหม่"""
+    """อัปโหลดไฟล์ไปยัง Google Drive โดยใช้ Folder ID จาก env หรือค้นหาตามชื่อ"""
     service = get_drive_service()
     if not service: return None
     
-    # 1. หา Folder ID
-    parent_id = None
-    if folder_name:
+    # 1. หา Folder ID (ลำดับความสำคัญ: ID จาก env > ค้นหาตามชื่อ)
+    parent_id = os.environ.get("GDRIVE_FOLDER_ID")
+    if not parent_id and folder_name:
         parent_id = get_folder_id_by_path(service, folder_name)
 
     # 2. ค้นหาไฟล์เดิมที่มีชื่อเดียวกันในโฟลเดอร์นั้น
