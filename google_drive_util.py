@@ -126,6 +126,39 @@ def upload_and_convert_to_gsheet(filepath, filename, folder_path=None):
     print(f'✅ อัปโหลดและแปลงไฟล์สำเร็จ File ID: {file.get("id")}')
     return file.get('id')
 
+def upload_file(filepath, filename, folder_name=None):
+    """อัปโหลดไฟล์ (เช่น JSON) ไปยัง Google Drive โดยค้นหาไฟล์เดิมเพื่ออัปเดต ถ้าไม่เจอจะสร้างใหม่"""
+    service = get_drive_service()
+    if not service: return None
+    
+    # 1. หา Folder ID
+    parent_id = None
+    if folder_name:
+        parent_id = get_folder_id_by_path(service, folder_name)
+
+    # 2. ค้นหาไฟล์เดิมที่มีชื่อเดียวกันในโฟลเดอร์นั้น
+    query = f"name='{filename}' and trashed=false"
+    if parent_id: query += f" and '{parent_id}' in parents"
+    
+    results = service.files().list(q=query, spaces='drive', fields='files(id, name)').execute()
+    files = results.get('files', [])
+
+    media = MediaFileUpload(filepath, resumable=True)
+    
+    if files:
+        # อัปเดตไฟล์เดิม
+        file_id = files[0]['id']
+        file = service.files().update(fileId=file_id, media_body=media).execute()
+        print(f"✅ อัปเดตไฟล์ '{filename}' สำเร็จ (ID: {file.get('id')})")
+    else:
+        # สร้างไฟล์ใหม่
+        file_metadata = {'name': filename}
+        if parent_id: file_metadata['parents'] = [parent_id]
+        file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+        print(f"✅ สร้างไฟล์ใหม' '{filename}' สำเร็จ (ID: {file.get('id')})")
+    
+    return file.get('id')
+
 if __name__ == "__main__":
     print("ระบบตรวจสอบสิทธิ์ Google Drive...")
     try:
