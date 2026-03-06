@@ -24,11 +24,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Setup Google Drive Credentials
+        env:
+          GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS_JSON }}
+          GDRIVE_TOKEN: ${{ secrets.GDRIVE_TOKEN_JSON }}
+        run: |
+          echo "$GDRIVE_CREDENTIALS" > credentials.json
+          echo "$GDRIVE_TOKEN" > token.json
+
       - name: Run Scraper
         env:
           PK_EMAIL: ${{ secrets.PK_EMAIL }}
           PK_PASSWORD: ${{ secrets.PK_PASSWORD }}
           GOOGLE_SCRIPT_URL: ${{ secrets.GOOGLE_SCRIPT_URL }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
           PK_START_PAGE: 1
           PK_MAX_PAGES: 10
         run: python scraper.py
